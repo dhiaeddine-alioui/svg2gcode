@@ -1,0 +1,309 @@
+{% extends 'home.html' %}
+
+
+{% block uploaded %}
+<p> Uploaded file :</p>
+<ul id="uploaded_files">
+  <li>{{file_name}}</li>
+</ul>
+<div style="display:block ; width:100%; height:500px; position:relative;">
+  <div id="preview" style="height: 100%; width:70%; border: 1px solid black; display:inline-block;">
+    <svg id=preview_svg style="width:100%;height:100%;" viewBox="{{viewport.minX}} {{viewport.minY}} {{viewport.width}} {{viewport.height}}">
+      {% for shape in shapes %}
+
+      {% if shape.type=="path" %}
+      <path id={{shape.type}}{{shape.ID}} fill="#00000000" stroke="#000000" d="{{shape.d}}" transform="{{shape.transform}}"></path>
+      {%endif%}
+
+      {% if shape.type=="circle" %}
+      <circle id={{shape.type}}{{shape.ID}} fill="#00000000" stroke="#000000"
+      cx={{shape.cx}} cy={{shape.cy}} r={{shape.r}} transform="{{shape.transform}}"></circle>
+      {%endif%}
+
+      {% if shape.type=="rect" %}
+      <rect id={{shape.type}}{{shape.ID}} fill="#00000000" stroke="#000000"
+      x={{shape.x}} y={{shape.y}} width={{shape.width}} height={{shape.height}} transform="{{shape.transform}}"></rect>
+      {%endif%}
+
+      {% if shape.type=="polygon" %}
+      <polygon id={{shape.type}}{{shape.ID}} fill="#00000000" stroke="#000000"
+      points="{{shape.points}}" transform="{{shape.transform}}"></polygon>
+      {%endif%}
+
+      {% endfor %}
+
+
+    </svg>
+  </div>
+  <div id="paths" style="height: 100%; width:29%; border: 1px solid blue; display:inline-block;float: right;
+  max-height:100%;overflow:auto;">
+  <div class="w3-bar w3-black">
+    <button class="w3-bar-item w3-button" onclick="openTab('shapes-tab')">Shapes</button>
+    <button class="w3-bar-item w3-button" onclick="openTab('parameters-tab')">Parameters</button>
+    <button class="button button1" onclick="openTab('result-tab')">Generate GCode</button>
+  </div>
+
+  <div id=shapes-tab class=tab>
+    <table>
+      <tr>
+        <th>Shape ID</th>
+        <th>Print</th>
+        <th>Wall</th>
+        <th>Skin</th>
+        <th>Color</th>
+      </tr>
+      {% for shape in shapes %}
+      <tr onmouseover='highlightpath("{{shape.type}}{{shape.ID}}")'
+      onmouseout='lightoffpath("{{shape.type}}{{shape.ID}}")'>
+      <th>{{shape.type}} {{shape.ID}}</th>
+      <th><input type="checkbox" data-id={{shape.ID}} data-type={{shape.type}} class="checkbox_print" id="checkbox_print_{{shape.type}}{{shape.ID}}" checked="true" onclick='handleClick(this,"{{shape.type}}{{shape.ID}}")'></th>
+      <th><input type="checkbox" class="checkbox_wall" id="checkbox_wall_{{shape.type}}{{shape.ID}}" onclick='handleClick(this,"{{shape.type}}{{shape.ID}}")' checked="true"></th>
+      <th><input type="checkbox" class="checkbox_skin" id="checkbox_skin_{{shape.type}}{{shape.ID}}" onclick='handleClick(this,"{{shape.type}}{{shape.ID}}")'></th>
+      <th>
+        <select id='color_{{shape.type}}{{shape.ID}}' onchange='colorSelect("{{shape.type}}{{shape.ID}}")'>
+          <option value="black">Black</option>
+          <option value="red">Red</option>
+          <option value="green">Green</option>
+          <option value="yellow">Yellow</option>
+          <option value="blue">Blue</option>
+          <option value="purple">Purple</option>
+          <option value="pink">Pink</option>
+        </select>
+      </th>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+<div id=parameters-tab class=tab style="display:none;">
+  <ul>
+    <li>
+      <label for=Xoffset>X offset :</label>
+      <input id=Xoffset type="number" value="43" style="width:100px"/>
+      <label for=Xoffset>mm</label>
+    </li>
+    <li>
+      <label for=Yoffset>Y offset :</label>
+      <input id=Yoffset type="number" value="18" style="width:100px"/>
+      <label for=Yoffset>mm</label>
+    </li>
+    <li>
+      <label for=bedXdim>Bed X dimension :</label>
+      <input id=bedXdim type="number" value="230" style="width:100px"/>
+      <label for=bedXdim>mm</label>
+    </li>
+    <li>
+      <label for=bedYdim>Bed Y dimension :</label>
+      <input id=bedYdim type="number" value="230" style="width:100px"/>
+      <label for=bedYdim>mm</label>
+    </li>
+    <li>
+      <label for=sizeFactor>Size factor :</label>
+      <input id=sizeFactor type="range" min="1" max="100" step="1"/>
+    </li>
+    <li>
+      <label for=penUp>Pen Up position (Z) :</label>
+      <input id=penUp type="number" value="20" style="width:100px"/>
+      <label for=penUp>mm</label>
+    </li>
+    <li>
+      <label for=penDown>Pen Down position (Z) :</label>
+      <input id=penDown type="number" value="18" style="width:100px"/>
+      <label for=penDown>mm</label>
+    </li>
+    <li>
+      <label for=xFlip>X Flip :</label>
+      <input id=xFlip type="checkbox"/>
+    </li>
+    <li>
+      <label for=yFlip>Y Flip :</label>
+      <input id=yFlip type="checkbox" checked=true />
+    </li>
+    <li>
+      <label for=leftMargin>Left margin :</label>
+      <input id=leftMargin type="number" value="5" style="width:100px"/>
+      <label for=leftMargin>mm</label>
+    </li>
+    <li>
+      <label for=botMargin>Bottom margin :</label>
+      <input id=botMargin type="number" value="5" style="width:100px"/>
+      <label for=botMargin>mm</label>
+    </li>
+    <li>
+      <label for=topMargin>Top margin :</label>
+      <input id=topMargin type="number" value="0" style="width:100px"/>
+      <label for=topMargin>mm</label>
+    </li>
+    <li>
+      <label for=rightMargin>Right margin :</label>
+      <input id=rightMargin type="number" value="0" style="width:100px"/>
+      <label for=rightMargin>mm</label>
+    </li>
+    <li>
+      <label for=realInterspace>Interlines space :</label>
+      <input id=realInterspace type="number" value="0.5" style="width:100px"/>
+      <label for=realInterspace>mm</label>
+    </li>
+    <li>
+      <label for=closeTolerance>Shape closed tolerance :</label>
+      <input id=closeTolerance type="number" value="2" style="width:100px"/>
+      <label for=closeTolerance>mm</label>
+    </li>
+    <li>
+      <label for=alwaysZhop>Pen Up always :</label>
+      <input id=alwaysZhop type="checkbox"/>
+    </li>
+    <li>
+      <label for=zHopTolerance>Z Hop tolerance :</label>
+      <input id=zHopTolerance type="number" value="1.5" style="width:100px"/>
+      <label for=zHopTolerance> * realInterspace </label>
+    </li>
+  </ul>
+</div>
+
+<div id=result-tab class=tab style="display:none;">
+</div>
+
+</div>
+
+</div>
+<script>
+  function highlightpath(pathID){
+    path=document.getElementById(pathID);
+    path.dataset.oldStyle=path.getAttribute("style")
+    path.style="stroke:lime;"
+  }
+  function lightoffpath(pathID){
+    path=document.getElementById(pathID);
+    path.style=path.dataset.oldStyle;
+  }
+  function handleClick(cb,shapeID){
+    shape=document.getElementById(shapeID);
+    if (cb.className=="checkbox_print"){
+      if (cb.checked ){
+        shape.setAttribute("opacity",1);
+      }
+      else {
+        shape.setAttribute("opacity",0);
+      }
+    }
+    if (cb.className=="checkbox_wall"){
+
+      if (cb.checked ){
+        shape.setAttribute("stroke","#000000");
+      }
+      else {
+        shape.setAttribute("stroke","#00000000");
+      }
+    }
+    if (cb.className=="checkbox_skin"){
+
+      if (cb.checked ){
+        shape.setAttribute("fill","#000000");
+      }
+      else {
+        shape.setAttribute("fill","#00000000");
+      }
+    }
+
+  }
+  function colorSelect(shapeID){
+    var color = document.getElementById("color_"+shapeID).value;
+    console.log("The selected color is :",color)
+    console.log("The shape id is :",shapeID)
+    document.getElementById(shapeID).dataset.oldStyle="stroke:"+color+";"
+    document.getElementById(shapeID).dataset.fillColor=color;
+
+  }
+  function openTab(tabName) {
+    if(tabName=="result-tab"){
+      generateGCode();
+    }
+    var i;
+    var x = document.getElementsByClassName("tab");
+    for (i = 0; i < x.length; i++) {
+      x[i].style.display = "none";
+    }
+    document.getElementById(tabName).style.display = "block";
+  }
+  function generateGCode(){
+    var printCheckboxes=Array.from(document.getElementsByClassName("checkbox_print"));
+    var shapes=[];
+    printCheckboxes.forEach((item, i) => {
+      if(item.checked==true){
+        var strokeCheckbox=document.getElementById("checkbox_wall_"+item.dataset.type+item.dataset.id)
+        var fillCheckbox=document.getElementById("checkbox_skin_"+item.dataset.type+item.dataset.id)
+        var color=document.getElementById("color_"+item.dataset.type+item.dataset.id)
+        var svgShape=document.getElementById(item.dataset.type+item.dataset.id)
+        var shapeJS={}
+        shapeJS["stroke"]=strokeCheckbox.checked;
+        shapeJS["fill"]=fillCheckbox.checked;
+        shapeJS["color"]=color.value;
+        if(item.dataset.type=="path"){
+          shapeJS["id"]=item.dataset.id;
+          shapeJS["type"]=item.dataset.type;
+          shapeJS["d"]=svgShape.getAttribute("d");
+          shapeJS["transform"]=svgShape.getAttribute("transform");
+          shapes.push(shapeJS)
+        }
+        if(item.dataset.type=="circle"){
+          shapeJS["id"]=item.dataset.id;
+          shapeJS["type"]=item.dataset.type;
+          shapeJS["cx"]=svgShape.getAttribute("cx");
+          shapeJS["cy"]=svgShape.getAttribute("cy");
+          shapeJS["r"]=svgShape.getAttribute("r");
+          shapeJS["transform"]=svgShape.getAttribute("transform");
+          shapes.push(shapeJS)
+        }
+        if(item.dataset.type=="rect"){
+          shapeJS["id"]=item.dataset.id;
+          shapeJS["type"]=item.dataset.type;
+          shapeJS["x"]=svgShape.getAttribute("x");
+          shapeJS["y"]=svgShape.getAttribute("y");
+          shapeJS["width"]=svgShape.getAttribute("width");
+          shapeJS["height"]=svgShape.getAttribute("height");
+          shapeJS["transform"]=svgShape.getAttribute("transform");
+          shapes.push(shapeJS)
+        }
+        if(item.dataset.type=="polygon"){
+          shapeJS["id"]=item.dataset.id;
+          shapeJS["type"]=item.dataset.type;
+          shapeJS["points"]=svgShape.getAttribute("points");
+          shapeJS["transform"]=svgShape.getAttribute("transform");
+          shapes.push(shapeJS)        }
+        }
+      });
+
+      parameters={};
+      parameters["Xoffset"]=parseFloat(document.getElementById("Xoffset").value);
+      parameters["Yoffset"]=parseFloat(document.getElementById("Yoffset").value);
+      parameters["bedXdim"]=parseFloat(document.getElementById("bedXdim").value);
+      parameters["bedYdim"]=parseFloat(document.getElementById("bedYdim").value);
+      parameters["sizeFactor"]=parseFloat(document.getElementById("sizeFactor").value/100);
+      parameters["penUp"]=parseFloat(document.getElementById("penUp").value);
+      parameters["penDown"]=parseFloat(document.getElementById("penDown").value);
+      parameters["xFlip"]=document.getElementById("xFlip").checked;
+      parameters["yFlip"]=document.getElementById("yFlip").checked;
+      parameters["leftMargin"]=parseFloat(document.getElementById("leftMargin").value);
+      parameters["rightMargin"]=parseFloat(document.getElementById("rightMargin").value);
+      parameters["botMargin"]=parseFloat(document.getElementById("botMargin").value);
+      parameters["topMargin"]=parseFloat(document.getElementById("topMargin").value);
+      parameters["realInterspace"]=parseFloat(document.getElementById("realInterspace").value);
+      parameters["closeTolerance"]=parseFloat(document.getElementById("closeTolerance").value);
+      parameters["zHopTolerance"]=parseFloat(document.getElementById("zHopTolerance").value*parameters["realInterspace"]);
+      parameters["alwaysZhop"]=document.getElementById("alwaysZhop").checked;
+
+      data={};
+      data["shapes"]=shapes;
+      data["parameters"]=parameters;
+
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "/generateGCode", true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.send(JSON.stringify(data));
+
+    }
+
+  </script>
+
+  {% endblock %}
