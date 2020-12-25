@@ -7,7 +7,7 @@
   <li>{{file_name}}</li>
 </ul>
 <div style="display:block ; width:100%; height:500px; position:relative;">
-  <div id="preview" style="height: 100%; width:70%; border: 1px solid black; display:inline-block;">
+  <div id="preview" style="height: 100%; width:50%; border: 1px solid black; display:inline-block;">
     <svg id=preview_svg style="width:100%;height:100%;" viewBox="{{viewport.minX}} {{viewport.minY}} {{viewport.width}} {{viewport.height}}">
       {% for shape in shapes %}
 
@@ -35,12 +35,13 @@
 
     </svg>
   </div>
-  <div id="paths" style="height: 100%; width:29%; border: 1px solid blue; display:inline-block;float: right;
+  <div id="paths" style="height: 100%; width:49%; border: 1px solid blue; display:inline-block;float: right;
   max-height:100%;overflow:auto;">
   <div class="w3-bar w3-black">
     <button class="w3-bar-item w3-button" onclick="openTab('shapes-tab')">Shapes</button>
     <button class="w3-bar-item w3-button" onclick="openTab('parameters-tab')">Parameters</button>
-    <button class="button button1" onclick="openTab('result-tab')">Generate GCode</button>
+    <button class="w3-bar-item w3-button" onclick="openTab('result-tab')">Preview</button>
+    <button class="button button1" onclick="generateGCode()">Generate GCode</button>
   </div>
 
   <div id=shapes-tab class=tab>
@@ -162,6 +163,7 @@
 </div>
 
 <div id=result-tab class=tab style="display:none;">
+  <img id=preview_img height="500px"> </img>
 </div>
 
 </div>
@@ -216,9 +218,6 @@
 
   }
   function openTab(tabName) {
-    if(tabName=="result-tab"){
-      generateGCode();
-    }
     var i;
     var x = document.getElementsByClassName("tab");
     for (i = 0; i < x.length; i++) {
@@ -296,11 +295,24 @@
       data={};
       data["shapes"]=shapes;
       data["parameters"]=parameters;
+      data["url"]=window.location.href
 
       var xhr = new XMLHttpRequest();
       xhr.open("POST", "/generateGCode", true);
       xhr.setRequestHeader('Content-Type', 'application/json');
       xhr.send(JSON.stringify(data));
+
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          var data = JSON.parse(xhr.responseText);
+          if(data["preview"]==true){
+            document.getElementById("result-tab").innerHTML = "";
+            var image=document.createElement('img')
+            image.src="/static/input/"+data["upload_id"]+"/"+data["datetime"]+"-preview.png"
+            document.getElementById("result-tab").appendChild(image)
+          }
+        }
+      }
 
     }
 

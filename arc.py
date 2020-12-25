@@ -28,10 +28,15 @@ def get_arc_parameters(x1,y1,x2,y2,fa,fs,rx,ry,rot):
     _x1=Vaux1[0][0]
     _y1=Vaux1[1][0]
     try :
-        _Coef=math.sqrt(   (     pow(rx,2)*pow(ry,2)  -  pow(rx,2)*pow(_y1,2)   -   pow(ry,2)*pow(_x1,2))/\
-                       (     pow(rx,2)*pow(_y1,2)   +   pow(ry,2)*pow(_x1,2))       )
+        N= (     pow(rx,2)*pow(ry,2)  -  pow(rx,2)*pow(_y1,2)   -   pow(ry,2)*pow(_x1,2))
+        D=(     pow(rx,2)*pow(_y1,2)   +   pow(ry,2)*pow(_x1,2))
+        if N<0 :
+            N*=-1
+        _Coef=math.sqrt( N / D)
     except ValueError :
+        print("N={}, D={}\n".format(N,D))
         print("Arc not rendered !\n")
+        print("rx {}, ry {}, _x1 {}, _y1 {}".format(rx,ry,_x1,_y1))
         return None,None,None,None
 
     if fa==fs:

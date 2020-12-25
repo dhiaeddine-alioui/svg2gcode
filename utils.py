@@ -8,14 +8,19 @@ from SVGElements.SVGPolygon import *
 from SVGElements.SVGRect import *
 from Shape import *
 
-CR="\n"
-startCode=";Start code"+CR
-startCode+="G28 X Y Z F4200"+CR
-startCode+="G21"+CR
+def getEndCode(p):
+    CR="\n"
+    endCode=";End code"+CR
+    endCode+="G0 Z{} F300".format(p.penUp)+CR
+    endCode+="G0 X0 Y230 F4200"+CR
+    return endCode
 
-endCode=";End code"+CR
-endCode+="G0 Z20 F300"+CR
-endCode+="G0 X0 Y230 F4200"+CR
+def getStartCode(p):
+    CR="\n"
+    startCode=";Start code"+CR
+    startCode+="G28 X Y Z F4200"+CR
+    startCode+="G21"+CR
+    return startCode
 
 def parseSVGfile(svgfilepath):
     # read the SVG file and extract the SVG Shapes (rect,circle,path,polygon,...)
