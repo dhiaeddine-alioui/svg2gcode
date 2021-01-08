@@ -1,8 +1,8 @@
-#SVG2GCODE
+# SVG2GCODE
 
 - This software converts SVG files to GCode executable on 3D printers. 
 
-##How it works ? 
+## How it works ? 
 
 - Parse the SVG file to SVGElements shapes
 - Render some SVGElements shapes like Arc, Cubicbeizer and Quadratic Beizer to points in a euclidean plane, Othe shapes like Line or Polygon are already rendered
