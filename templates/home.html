@@ -28,26 +28,60 @@ tr:nth-child(even) {
   background-color: #dddddd;
 }
 
-.button {
-  border: none;
-  color: white;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  transition-duration: 0.4s;
-  cursor: pointer;
+.tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
 }
 
-.button1 {
-  background-color: white;
-  color: black;
-  border: 2px solid #4CAF50;
+
+/* Style the buttons inside the tab */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  font-size: 17px;
 }
-.button1:hover {
-  background-color: #4CAF50;
-  color: white;
+
+.tab a {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+.tab .tablinks:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab .tablinks.active {
+  background-color: #ccc;
+}
+
+.tab .button-generate {
+  background-color: #6de390
+}
+
+.tab .button-generate:hover {
+  background-color: #008f2b
+}
+
+.tab #button-download{
+  background-color: #ff7575
+}
+
+.tab #button-download:hover{
+  background-color: #c90000
 }
 </style>
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">

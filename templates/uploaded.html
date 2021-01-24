@@ -37,14 +37,15 @@
   </div>
   <div id="paths" style="height: 100%; width:49%; border: 1px solid blue; display:inline-block;float: right;
   max-height:100%;overflow:auto;">
-  <div class="w3-bar w3-black">
-    <button class="w3-bar-item w3-button" onclick="openTab('shapes-tab')">Shapes</button>
-    <button class="w3-bar-item w3-button" onclick="openTab('parameters-tab')">Parameters</button>
-    <button class="w3-bar-item w3-button" onclick="openTab('result-tab')">Preview</button>
-    <button class="button button1" onclick="generateGCode()">Generate GCode</button>
+  <div class="tab">
+    <button class="tablinks active" onclick="openTab(event,'shapes-tab')">Shapes</button>
+    <button class="tablinks" onclick="openTab(event,'parameters-tab')">Parameters</button>
+    <button class="tablinks" onclick="openTab(event,'result-tab')">Preview</button>
+    <button class="button-generate" onclick="generateGCode()">Generate GCode</button>
+    <a href="/downloadGCode" id="button-download" style="display:none;">Download GCode</a>
   </div>
 
-  <div id=shapes-tab class=tab>
+  <div id=shapes-tab class=tabcontent>
     <table>
       <tr>
         <th>Shape ID</th>
@@ -76,7 +77,7 @@
   </table>
 </div>
 
-<div id=parameters-tab class=tab style="display:none;">
+<div id=parameters-tab class=tabcontent style="display:none;">
   <ul>
     <li>
       <label for=Xoffset>X offset :</label>
@@ -162,7 +163,7 @@
   </ul>
 </div>
 
-<div id=result-tab class=tab style="display:none;">
+<div id=result-tab class=tabcontent style="display:none;">
   <img id=preview_img height="500px"> </img>
 </div>
 
@@ -170,6 +171,7 @@
 
 </div>
 <script>
+
   function highlightpath(pathID){
     path=document.getElementById(pathID);
     path.dataset.oldStyle=path.getAttribute("style")
@@ -217,14 +219,23 @@
     document.getElementById(shapeID).dataset.fillColor=color;
 
   }
-  function openTab(tabName) {
-    var i;
-    var x = document.getElementsByClassName("tab");
-    for (i = 0; i < x.length; i++) {
-      x[i].style.display = "none";
+  function openTab(evt, tabName) {
+
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
     document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+
   }
+
+
   function generateGCode(){
     var printCheckboxes=Array.from(document.getElementsByClassName("checkbox_print"));
     var shapes=[];
@@ -304,16 +315,22 @@
 
       xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
-          var data = JSON.parse(xhr.responseText);
-          if(data["preview"]==true){
-            document.getElementById("result-tab").innerHTML = "";
-            var image=document.createElement('img')
-            image.src="/static/input/"+data["upload_id"]+"/"+data["datetime"]+"-preview.png"
-            document.getElementById("result-tab").appendChild(image)
-          }
+          document.getElementById("preview_img").src="/preview.png/"+makeid(20);
+          openTab(event,'result-tab')
+          document.getElementById("button-download").style.display="inline-block"
         }
       }
 
+    }
+
+    function makeid(length) {
+       var result           = '';
+       var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+       var charactersLength = characters.length;
+       for ( var i = 0; i < length; i++ ) {
+          result += characters.charAt(Math.floor(Math.random() * charactersLength));
+       }
+       return result;
     }
 
   </script>

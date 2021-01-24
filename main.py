@@ -1,4 +1,4 @@
-from flask import Flask,render_template,flash, request, redirect, url_for,jsonify
+from flask import Flask,render_template,flash, request, redirect, url_for,jsonify,session,send_file,make_response
 from werkzeug.utils import secure_filename
 import os
 import random
@@ -21,6 +21,8 @@ ALLOWED_EXTENSIONS = {'svg'}
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.secret_key = "any-random-string"
+
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -33,10 +35,10 @@ def get_random_string(length):
     return(result_str)
 
 @app.route('/', methods=['GET'])
-def home():
-    return render_template('upload.html')
+def home(upload=None):
+        return render_template('upload.html')
 
-@app.route('/upload-svg',methods=['POST'])
+@app.route('/',methods=['POST'])
 def upload_svg():
     if 'file' not in request.files:
         flash('No file part')
@@ -48,27 +50,17 @@ def upload_svg():
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         upload_id=get_random_string(100)
+        session["upload_id"]=upload_id
+        session["filename"]=filename
         upload_dir=os.path.join(app.config['UPLOAD_FOLDER'],upload_id)
         os.mkdir(upload_dir)
         file.save(os.path.join(upload_dir, filename))
-        return redirect(url_for('uploaded_file',
-                                    upload_id=upload_id))
-    else :
-        return redirect(url_for('home'))
-
-
-@app.route('/<upload_id>',methods=['GET'])
-def uploaded_file(upload_id):
-    if os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'],upload_id)):
-        file=os.listdir(os.path.join(app.config['UPLOAD_FOLDER'],upload_id))
-        # read the SVG file
-        file_path="./static/input/"+upload_id+"/"+file[0]
-        file_name=file[0]
+        file_path="./static/input/"+upload_id+"/"+filename
         try :
             doc = minidom.parse(file_path)
         except :
             print("Error ! "+file_path+" does not exist ! ")
-            exit()
+            return redirect(url_for('home'))
         else :
             svg_shapes=parseSVGfile(file_path)
 
@@ -89,16 +81,29 @@ def uploaded_file(upload_id):
             dimension["height"]=p.maxY-p.minY
 
             return render_template('uploaded.html',viewport=dimension,
-            file_name=file_name,shapes=shapesJS)
+            file_name=filename,shapes=shapesJS)
     else :
-        return render_template('upload.html')
+        return redirect(url_for('home'))
+
+@app.route('/preview.png/<random>',methods=['GET'])
+def send_preview(random):
+    response=make_response(send_file("./static/input/"+session["upload_id"]+"/preview.png", attachment_filename='preview.png'))
+    response.headers["cache-control"]="no-cache"
+    return response
+
+@app.route('/downloadGCode',methods=['GET'])
+def download_gcode():
+    return send_file("./static/input/"+session["upload_id"]+"/"+session["filename"]+".gcode",
+    attachment_filename=session["filename"]+".gcode",
+    as_attachment=True)
 
 @app.route('/generateGCode',methods=['POST'])
 def generate_GCode():
     data=request.get_json();
     parametersJS=data["parameters"]
     SVGshapesJS=data["shapes"]
-    upload_id=re.findall(r".*/([a-zA-Z]*)",data["url"])[0]
+    upload_id=session["upload_id"]
+    filename=session["filename"]
 
     print(upload_id)
     p=Parameters()
@@ -154,7 +159,8 @@ def generate_GCode():
 
     finalGCode+=getEndCode(p)
 
-    with open("output.gcode","w") as file :
+
+    with open("./static/input/"+upload_id+"/"+filename+".gcode","w") as file :
         file.write(finalGCode)
     plt.clf()
     plt.axis([0, 230, 0, 230])
@@ -168,12 +174,7 @@ def generate_GCode():
         plt.plot(state.PltX[index],state.PltY[index],'b',linewidth="0.5")
 
     plt.axes().set_aspect('equal')
-    now=datetime.now()
-    date_time = now.strftime("%m-%d-%Y_%H-%M-%S")
-    plt.savefig(os.path.join("./static/input",upload_id,date_time+"-preview.png"))
+    plt.savefig(os.path.join("./static/input",upload_id,"preview.png"))
 
-    data={}
-    data["datetime"]=date_time
-    data["upload_id"]=upload_id
     data["preview"]=True
-    return jsonify(data),200
+    return "",200
