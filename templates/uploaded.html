@@ -2,12 +2,11 @@
 
 
 {% block uploaded %}
-<p> Uploaded file :</p>
-<ul id="uploaded_files">
-  <li>{{file_name}}</li>
-</ul>
-<div style="display:block ; width:100%; height:500px; position:relative;">
-  <div id="preview" style="height: 100%; width:50%; border: 1px solid black; display:inline-block;">
+<h2 id="uploaded-text"> Uploaded file :</h2>
+<h3 id="uploaded_files">{{file_name}}</h3>
+
+<div style="display:block ; width:100%; height:500px;padding-right:20px;padding-left:20px;">
+  <div id="preview" style="height: 100%; width:50%; border: 1px solid black; display:inline-block; background-color:#ffffff;">
     <svg id=preview_svg style="width:100%;height:100%;" viewBox="{{viewport.minX}} {{viewport.minY}} {{viewport.width}} {{viewport.height}}">
       {% for shape in shapes %}
 
@@ -36,7 +35,7 @@
     </svg>
   </div>
   <div id="paths" style="height: 100%; width:49%; border: 1px solid blue; display:inline-block;float: right;
-  max-height:100%;overflow:auto;">
+  max-height:100%;overflow:auto; background-color:#ffffff;">
   <div class="tab">
     <button class="tablinks active" onclick="openTab(event,'shapes-tab')">Shapes</button>
     <button class="tablinks" onclick="openTab(event,'parameters-tab')">Parameters</button>

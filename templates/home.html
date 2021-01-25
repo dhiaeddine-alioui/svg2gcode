@@ -83,6 +83,38 @@ tr:nth-child(even) {
 .tab #button-download:hover{
   background-color: #c90000
 }
+
+#uploaded-text{
+margin-top:20px;
+margin-left:20px;
+font-family: "Comic Sans MS", cursive, sans-serif;
+font-size: 28px;
+letter-spacing: 0px;
+word-spacing: 2px;
+color: #000000;
+font-weight: 700;
+text-decoration: none solid rgb(68, 68, 68);
+font-style: normal;
+font-variant: normal;
+text-transform: none;
+
+}
+
+#uploaded_files{
+margin-left:50px;
+font-family: "Comic Sans MS", cursive, sans-serif;
+font-size: 20px;
+letter-spacing: 0px;
+word-spacing: 2px;
+color: #000000;
+font-weight: 700;
+text-decoration: none solid rgb(68, 68, 68);
+font-style: normal;
+font-variant: normal;
+text-transform: none;
+
+}
+
 </style>
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 
@@ -90,7 +122,8 @@ tr:nth-child(even) {
 
 <body>
 
-<h1>SVG to GCode converter</h1>
+<img src="static/svg2gcode.png" width=100%></img>
+
 {% block upload %}
 {% endblock %}
 {% block uploaded %}
